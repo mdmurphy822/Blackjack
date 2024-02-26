@@ -1,0 +1,79 @@
+import random
+
+suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
+values = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
+
+def create_deck():
+    return [f'{value} of {suit}' for suit in suits for value in values]
+
+def shuffle_deck(deck):
+    random.shuffle(deck)
+    return deck
+
+def deal_cards(deck):
+    player_hand = [deck.pop() for _ in range(2)]
+    dealer_hand = [deck.pop() for _ in range(2)]
+    return player_hand, dealer_hand, deck
+
+def card_value(card):
+    value = card.split(' ')[0]
+    if value in ['Jack', 'Queen', 'King']:
+        return 10
+    elif value == 'Ace':
+        # For simplicity in this example, treat Ace as 11
+        # A more complete implementation would consider the best value for Ace (1 or 11)
+        return 11
+    else:
+        return int(value)
+
+def calculate_hand_total(hand):
+    total = sum(card_value(card) for card in hand)
+    # Adjust for Ace value if total is over 21
+    num_aces = sum(1 for card in hand if card.startswith('Ace'))
+    while total > 21 and num_aces:
+        total -= 10
+        num_aces -= 1
+    return total
+
+def play_blackjack():
+    deck = create_deck()
+    shuffled_deck = shuffle_deck(deck)
+    player_hand, dealer_hand, deck = deal_cards(shuffled_deck)
+
+    # Player's turn
+    while True:
+        player_score = calculate_hand_total(player_hand)
+        print(f"Player's hand: {player_hand}, Total: {player_score}")
+        if player_score > 21:
+            print("Bust! Player's score exceeds 21.")
+            break
+        hit = input("Do you want to hit? (y/n): ").lower()
+        if hit == 'y':
+            player_hand.append(deck.pop())
+            print("New card drawn!")
+            print(f"Player's hand: {player_hand}, Total: {calculate_hand_total(player_hand)}")
+        else:
+            break
+
+# Dealer's turn (if player hasn't busted)
+    if player_score <= 21:
+        dealer_score = calculate_hand_total(dealer_hand)
+        while dealer_score < 17:
+            dealer_hand.append(deck.pop())
+            dealer_score = calculate_hand_total(dealer_hand)
+        print(f"Dealer's hand: {dealer_hand}, Total: {dealer_score}")
+
+    # Determine winner
+    if player_score > 21:
+        print("Dealer wins by player bust!")
+    elif dealer_score > 21 or player_score > dealer_score:
+        print("Player wins!")
+    elif player_score < dealer_score:
+        print("Dealer wins!")
+    else:
+        print("It's a tie!")
+        
+    # Continue with dealer's turn and outcome determination...
+
+# Execute the game
+play_blackjack()
